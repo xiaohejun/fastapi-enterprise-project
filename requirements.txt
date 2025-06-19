@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+sqlmodel
+dependency-injector
+psycopg2-binary
+asyncpg
+bcrypt
+pydantic_settings
