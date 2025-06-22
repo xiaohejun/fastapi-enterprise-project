@@ -1,30 +1,46 @@
-version: '3.9'
-
 services:
-  db:
+  postgres:
     image: postgres:14-alpine
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=app
+      TIMEZONE: ${TIMEZONE}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    volumes:
+      - ${POSTGRES_LOCAL_DATA}:/var/lib/postgresql/data
+      # - ./alembic:/alembic
     ports:
-      - "5432:5432"
-  
-  app:
-    build: .
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+      - "${POSTGRES_LOCAL_PORT}:${POSTGRES_PORT}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 3s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:${POSTGRES_PORT}/${POSTGRES_DB}
+      API_PORT: ${API_PORT}
+      # SECRET_KEY: your-secret-key
+      # ALGORITHM: HS256
+      # ACCESS_TOKEN_EXPIRE_MINUTES: 30
     volumes:
       - .:/code
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/app
-      - DEBUG=true
     ports:
-      - "8000:8000"
+      - "${API_LOCL_PORT}:${API_PORT}"
     depends_on:
-      - db
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
 
-volumes:
-  postgres_data:
-    driver: local
+networks:
+  app-network:
+    driver: bridge

@@ -1,10 +1,18 @@
-from abc import ABC
-from typing import Any
+from typing import Generic, Type, TypeVar
+from uuid import UUID
 
-class BaseService(ABC):
-    """基础服务类"""
-    
-    def __init__(self, **dependencies: Any):
-        """初始化服务，注入依赖"""
-        for key, value in dependencies.items():
-            setattr(self, key, value)
+from pydantic import BaseModel
+
+from app.repositories.base import BaseRepository
+from app.schemas.base import BaseCreateSchema, BasePublicSchema
+
+
+class BaseService:
+    def __init__(self, BaseRepository: BaseRepository, create_schema: BaseCreateSchema, publish_schema: BasePublicSchema):
+        self.create_schema = create_schema
+        self.public_schema = publish_schema
+        self.repo = BaseRepository
+
+    async def create(self, create_data: BaseCreateSchema) -> BaseModel:
+        data = self.create_schema.model_validate(create_data)
+        return self.public_schema.model_validate(await self.repo.create(data))

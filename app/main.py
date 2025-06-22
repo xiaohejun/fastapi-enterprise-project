@@ -1,43 +1,49 @@
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.routers import api_router
-from app.config import settings
-from app.db.session import db_session_manager
+from app.core.database import db
+# from app.routers import configs, tasks, users
+from app.api.v1 import users
 
 
-class FastAPIApp:
-    """FastAPI 应用初始化和配置类。"""
+async def lifespan(app: FastAPI):
+    await db.create_tables()
+    yield
+    await db.close()
 
-    def __init__(self):
-        self.app = FastAPI(
-            title=settings.app_name,
-            debug=settings.debug
-        )
-        self._setup_cors()
-        self._register_routes()
-        self._setup_startup_event()
+app = FastAPI(
+    title="AI仿真平台API",
+    description="企业级AI模型训练和推理仿真平台",
+    version="1.0.0",
+    openapi_url="/api/v1/openapi.json",
+    lifespan=lifespan
+)
 
-    def _setup_cors(self):
-        """设置 CORS 中间件。"""
-        self.app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
+# 配置CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-    def _register_routes(self):
-        """注册 API 路由。"""
-        self.app.include_router(api_router, prefix="/api/v1")
-
-    def _setup_startup_event(self):
-        """设置应用启动事件。"""
-        @self.app.on_event("startup")
-        async def on_startup():
-            await db_session_manager.init_db()
+# 包含路由
+app.include_router(users.router)
+# app.include_router(configs.router)
+# app.include_router(tasks.router)
 
 
-# 初始化 FastAPI 应用
-app = FastAPIApp().app
+@app.get("/health", tags=["health"])
+async def health_check():
+    return {"status": "ok", "message": "Service is healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run(
+        "app.main:app", host="0.0.0.0", port=int(os.getenv("API_PORT")), reload=True, log_level="info"
+    )

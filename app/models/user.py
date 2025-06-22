@@ -1,21 +1,37 @@
-from typing import Optional
-from sqlmodel import SQLModel, Field, Relationship
+from enum import Enum
+from typing import List
+from sqlmodel import Field, Relationship
+from app.models.base import BaseSQLModel
 
-class UserBase(SQLModel):
-    """用户基本信息"""
-    username: str = Field(unique=True, index=True)
-    email: str = Field(unique=True, index=True)
+
+class RoleEnum(str, Enum):
+    ADMIN = "admin"
+    USER = "user"
+
+
+class User(BaseSQLModel, table=True):
+    __tablename__ = "users"
+
+    username: str = Field(
+        unique=True,
+        index=True,
+        max_length=50
+    )
+    password_hash: str
     is_active: bool = Field(default=True)
+    role: RoleEnum = Field(default=RoleEnum.USER)
 
-class User(UserBase, table=True):
-    """用户数据库模型"""
-    id: Optional[int] = Field(default=None, primary_key=True)
-    password_hash: str = Field()
+    # User 和 Config 的对应关系 (一对多)
+    model_configs: List["ModelConfig"] = Relationship(back_populates="user")
+    system_configs: List["SystemConfig"] = Relationship(back_populates="user")
+    inference_runtime_configs: List["InferenceRuntimeConfig"] = Relationship(
+        back_populates="user"
+    )
+    # train_runtime_configs: List["TrainRuntimeConfig"] = Relationship(
+    #     back_populates="user"
+    # )
 
-class UserCreate(UserBase):
-    """创建用户的请求模型"""
-    password: str
-
-class UserRead(UserBase):
-    """返回给客户端的用户模型"""
-    id: int
+    # # User 和 Task 的对应关 (一对多)
+    # inference_sim_tasks: List["InferenceSimTask"] = Relationship(
+    #     back_populates="user"
+    # )

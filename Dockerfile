@@ -70,5 +70,5 @@ EXPOSE 8000
 
 # 启动应用
 # CMD ["uvicorn", "--factory", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-# CMD ["python", "-m", "app.main"]
+CMD ["python", "-m", "app.main"]
 

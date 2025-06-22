@@ -1,8 +1,17 @@
 fastapi
-uvicorn
+uvicorn # 启动fastapi应用h
 sqlmodel
-dependency-injector
-psycopg2-binary
 asyncpg
-bcrypt
-pydantic_settings
+greenlet
+# alembic # 用于数据库迁移
+# dependency-injector
+# bcrypt
+# pydantic_settings
+
+# asgi-lifespan
+# aiosqlite
+# python-dotenv
+passlib[bcrypt]
+# python-multipart
+# python-jose[cryptography]
+# python-dateutil
