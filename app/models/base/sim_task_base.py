@@ -4,7 +4,7 @@ from uuid import UUID
 
 from sqlmodel import Field
 from sqlalchemy.dialects.postgresql import JSONB
-from app.models.base import BaseSQLModel
+from app.models.base.base import BaseSQLModel
 
 
 class SimTaskStatusEnum(str, Enum):

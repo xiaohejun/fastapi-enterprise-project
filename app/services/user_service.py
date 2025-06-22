@@ -2,7 +2,7 @@ from uuid import UUID
 
 from passlib.context import CryptContext
 
-from app.models import User
+from app.models.user import User
 from app.repositories.user_repo import UserRepository
 from app.schemas.user import UserCreateSchema, UserPublicSchema
 from app.services.base.crud import CRUDBaseService

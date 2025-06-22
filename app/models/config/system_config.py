@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 from sqlmodel import Relationship
-from app.models.base import ConfigBaseSQLModel
+from app.models.base.config_base import ConfigBaseSQLModel
 
 
 class SystemTypeEnum(str, Enum):

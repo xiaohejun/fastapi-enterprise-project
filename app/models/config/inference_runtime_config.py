@@ -1,6 +1,6 @@
 from typing import Optional
 from sqlmodel import Relationship
-from app.models.base import ConfigBaseSQLModel
+from app.models.base.config_base import ConfigBaseSQLModel
 
 
 class InferenceRuntimeConfig(ConfigBaseSQLModel, table=True):

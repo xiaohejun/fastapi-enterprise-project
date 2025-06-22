@@ -25,7 +25,7 @@
 # # 启动命令
 # CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 # 第一阶段：构建阶段
-FROM python:3.11 AS builder
+FROM python:3.13 AS builder
 
 # 设置工作目录
 WORKDIR /code
@@ -42,7 +42,7 @@ ENV PATH="/venv/bin:$PATH"
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 第二阶段：运行阶段
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 # 创建非 root 用户
 RUN groupadd -r appgroup && useradd -r -g appgroup -d /app appuser
@@ -69,6 +69,5 @@ USER appuser
 EXPOSE 8000
 
 # 启动应用
-# CMD ["uvicorn", "--factory", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
-CMD ["python", "-m", "app.main"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
 
